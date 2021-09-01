@@ -1,6 +1,3 @@
-console.log('[DevSoutinho] Flappy Bird');
-
-
 const sprites = new Image();
 sprites.src = './sprites.png';
 
