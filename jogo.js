@@ -31,6 +31,25 @@ const telaInicio = {
 
 }
 
+const telaGameOver = {
+    spriteX: 134,
+    spriteY: 153,
+    largura: 226,
+    altura: 200,
+    x: (canvas.width / 2) - 226 / 2,
+    y: 50,
+    desenha() {
+        contexto.drawImage(
+            sprites,
+            telaGameOver.spriteX, telaGameOver.spriteY,
+            telaGameOver.largura, telaGameOver.altura,
+            telaGameOver.x, telaGameOver.y,
+            telaGameOver.largura, telaGameOver.altura,
+        );
+    },
+
+}
+
 function criarCanos() {
 
     const canos = {
@@ -92,7 +111,7 @@ function criarCanos() {
         temColisaoComOBird(paresDeCanos) {
             const cabecaBird = globais.bird.y
             const peDoBird = globais.bird.y + globais.bird.altura
-            if (globais.bird.x >= paresDeCanos.x) {
+            if (globais.bird.x + globais.bird.largura - 5 >= paresDeCanos.x) {
                 if (cabecaBird <= paresDeCanos.canoCeu.y) {
                     return true
                 }
@@ -120,7 +139,8 @@ function criarCanos() {
                 paresDeCanos.x = paresDeCanos.x - 2
 
                 if (canos.temColisaoComOBird(paresDeCanos)) {
-                    mudaTela(telas.INICIO)
+                    som_HIT.play();
+                    mudaTela(telas.GAME_OVER)
                 }
 
                 if (paresDeCanos.x + canos.largura <= 0) {
@@ -238,9 +258,8 @@ function criarBird() {
             if (fazColisao(bird, globais.chao)) {
                 console.log("fez colisao")
                 som_HIT.play();
-                setTimeout(() => {
-                    mudaTela(telas.INICIO)
-                }, 200);
+
+                mudaTela(telas.GAME_OVER)
 
                 return
             }
@@ -293,6 +312,30 @@ function mudaTela(novaTela) {
     }
 }
 
+function criarPlacar() {
+    const placar = {
+        pontuacao: 0,
+
+
+        desenha() {
+            contexto.font = '40px "VT323"'
+            contexto.fillStyle = "black"
+            contexto.textAlign = 'right'
+            contexto.fillText(`${placar.pontuacao}`, canvas.width - 10, 35)
+        },
+
+        atualiza() {
+            const intervaloDeFrames = 200;
+            const passouIntervalo = frames % intervaloDeFrames === 0
+            if (passouIntervalo) {
+                placar.pontuacao += 1
+            }
+        },
+    }
+
+    return placar
+}
+
 const telas = {
     INICIO: {
         inicializa() {
@@ -319,11 +362,16 @@ const telas = {
 };
 
 telas.JOGO = {
+    inicializa() {
+        globais.placar = criarPlacar();
+    },
+
     desenha() {
         planoDeFundo.desenha();
         globais.canos.desenha();
         globais.chao.desenha();
         globais.bird.desenha();
+        globais.placar.desenha();
     },
 
     click() {
@@ -332,8 +380,25 @@ telas.JOGO = {
 
     atualiza() {
         globais.canos.atualiza();
+        globais.chao.atualiza();
         globais.bird.atualiza();
+        globais.placar.atualiza();
     }
+}
+
+telas.GAME_OVER = {
+    desenha() {
+        telaGameOver.desenha();
+    },
+
+    atualiza() {
+
+    },
+
+    click() {
+        mudaTela(telas.INICIO)
+    }
+
 }
 
 
